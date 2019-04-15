@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.utils.data as data
 import torch.nn.functional as F
 from tqdm import tqdm
+from math import ceil
 import numpy as np
 from distutils.version import LooseVersion
 from tensorboardX import SummaryWriter
@@ -38,7 +39,7 @@ datasets_path={
     'synthia': {'data_root_path': './datasets/SYNTHIA', 'list_path': './datasets/SYNTHIA/list',
                     'image_path':'./datasets/SYNTHIA/RGB',
                     'gt_path': './datasets/SYNTHIA/GT/LABELS'},
-    'NTHU': {'data_root_path': './datasets/NTHU_Datasets'}
+    'NTHU': {'data_root_path': './datasets/NTHU_Datasets', 'list_path': './datasets/NTHU_list'}
     }
 
 def str2bool(v):
@@ -495,20 +496,11 @@ class Trainer():
             self.logger.info("Loading checkpoint '{}'".format(filename))
             checkpoint = torch.load(filename)
 
-            if 'epoch' in checkpoint:
-                self.current_epoch = checkpoint['epoch'] -1
-                self.current_iter = checkpoint['iteration']
+            if 'state_dict' in checkpoint:
                 self.model.load_state_dict(checkpoint['state_dict'])
-                self.optimizer.load_state_dict(checkpoint['optimizer'])
-                self.best_MIou = checkpoint['best_MIou']
-                self.best_iter = checkpoint['iteration']
-
-                self.logger.info("Checkpoint loaded successfully from '{}' at (epoch {}) at (iteration {},MIoU:{})\n"
-                    .format(filename, checkpoint['epoch'], checkpoint['iteration'],
-                            checkpoint['best_MIou']))
             else:
                 self.model.module.load_state_dict(checkpoint)
-                self.logger.info("Checkpoint loaded successfully from "+filename)
+            self.logger.info("Checkpoint loaded successfully from "+filename)
         except OSError as e:
             self.logger.info("No checkpoint exists from '{}'. Skipping...".format(self.args.checkpoint_dir))
             self.logger.info("**First time to train**")

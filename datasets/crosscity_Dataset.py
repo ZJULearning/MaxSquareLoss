@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import scipy.io
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageOps, ImageFilter, ImageFile
 import numpy as np
 import copy
 import os
@@ -17,7 +17,7 @@ class CrossCity_Dataset(City_Dataset):
     def __init__(self,
                  args,
                  data_root_path='./datasets/NTHU_Datasets/Rio',
-                 list_path='./datasets/NTHU_Datasets/Rio/List',
+                 list_path='./datasets/NTHU_list/Rio/List',
                  split='train',
                  base_size=769,
                  crop_size=769,

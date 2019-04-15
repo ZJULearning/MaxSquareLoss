@@ -297,7 +297,7 @@ if __name__ == '__main__':
     args.source_list_path = datasets_path[args.source_dataset]['list_path']
 
     args.data_root_path = os.path.join(datasets_path['NTHU']['data_root_path'], args.city_name)
-    args.list_path = os.path.join(datasets_path['NTHU']['data_root_path'], args.city_name, 'List')
+    args.list_path = os.path.join(datasets_path['NTHU']['list_path'], args.city_name, 'List')
 
     args.target_crop_size = args.crop_size
     args.target_base_size = args.base_size

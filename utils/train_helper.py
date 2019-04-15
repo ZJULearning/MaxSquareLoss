@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from graphs.models.deeplab_vgg import DeeplabVGG
 from graphs.models.deeplab_multi import DeeplabMulti
 
 def get_model(args):

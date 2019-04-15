@@ -57,36 +57,36 @@ We present several trained results reported in our paper and provide the corresp
 | :-----: | :----: | :--------------: | :-------: | :----------: | :----------------: |
 | mIoU(%) |  36.9  |       42.2       |   44.3    |     45.2     |        46.4        |
 
-To get above results, download the corresponding checkpoints and put them to "log" folder. Use the following code to evaluate.
+To get above results, download corresponding checkpoints and put them to "pretrained_model/checkpoint" folder. Use the following code to evaluate.
 
 **MaxSquare**
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare.pth" --image_summary True
 ```
 
 **MaxSquare+IW**
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare_IW.pth" --image_summary True
 ```
 
 **MaxSquare+IW+Multi**
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare_IW_Multi.pth" --image_summary True
 ```
 
 Since we use random mirror to augment the data, ensembling the model prediction and the prediction on the filpped image will sightly boost the performance, which can be done with "--flip True"
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare_IW_Multi.pth" --image_summary True --flip True
 ```
 
 To have a look at predicted examples, run tensorboard as follows:
 
 ```
-
+tensorboard --logdir=./log/eval_city  --port=6009
 ```
 
 
@@ -101,19 +101,19 @@ To have a look at predicted examples, run tensorboard as follows:
 **MaxSquare**
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/synthia_to_Cityscapes_MaxSquare.pth" --image_summary True  --num_classes 16
 ```
 
 **MaxSquare+IW**
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/synthia_to_Cityscapes_MaxSquare_IW.pth" --image_summary True  --num_classes 16
 ```
 
 **MaxSquare+IW+Multi**
 
 ```
-
+python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/synthia_to_Cityscapes_MaxSquare_IW_Multi.pth" --image_summary True --flip True --num_classes 16
 ```
 
 
@@ -149,6 +149,32 @@ Evaluation (take "Rome" for example):
 **MaxSquare**
 
 ```
+python3 tools/evaluate.py --gpu "0" --city_name 'Rome' --checkpoint_dir "./log/eval_Rome" --pretrained_ckpt_file "./pretrained_model/checkpoint/Cityscapes_to_Rome_MaxSquare.pth" --image_summary True  --num_classes 13
+```
+
+**MaxSquare+IW**
+
+```
+python3 tools/evaluate.py --gpu "0" --city_name 'Rome' --checkpoint_dir "./log/eval_Rome" --pretrained_ckpt_file "./pretrained_model/checkpoint/Cityscapes_to_Rome_MaxSquare_IW.pth" --image_summary True  --num_classes 13
+```
+
+
+
+## Training
+
+#### GTA5-to-Cityscapes:
+
+(Optional) Pretrain the model on the source domain (GTA5). 
+
+You can skip this step by downloading the checkpoint pretrained on GTA5 in "Setup" section.
+
+```
+
+```
+
+**MaxSquare**
+
+```
 
 ```
 
@@ -158,11 +184,43 @@ Evaluation (take "Rome" for example):
 
 ```
 
+**MaxSquare+IW+Multi**
+
+```
+
+```
 
 
 
+#### **SYNTHIA-to-Cityscapes:**
 
-## Training
+(Optional) Pretrain the model on the source domain (SYNTHIA). 
+
+```
+
+```
+
+**MaxSquare** (example)
+
+```
+
+```
+
+
+
+#### Cityscapes-to-NTHU
+
+(Optional) Pretrain the model on the source domain (Cityscapes). 
+
+```
+
+```
+
+**MaxSquare** (take "Rome" for example)
+
+```
+
+```
 
 
 

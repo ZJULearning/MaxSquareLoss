@@ -51,17 +51,28 @@ class Evaluater():
         self.model = nn.DataParallel(self.model, device_ids=[0])
         self.model.to(self.device)
 
+        # load pretrained checkpoint
+        if self.args.pretrained_ckpt_file is not None:
+            path1 = os.path.join(*self.args.checkpoint_dir.split('/')[:-1], self.train_id + 'best.pth')
+            path2 = self.args.pretrained_ckpt_file
+            if os.path.exists(path1):
+                pretrained_ckpt_file = path1
+            elif os.path.exists(path2):
+                pretrained_ckpt_file = path2
+            else:
+                raise AssertionError("no pretrained_ckpt_file")
+            self.load_checkpoint(pretrained_ckpt_file)
+
         # dataloader
         self.dataloader = City_DataLoader(self.args) if self.args.dataset=="cityscapes" else GTA5_DataLoader(self.args)
-        if args.city_name != "None":
-            target_data_set = CrossCity_Dataset(args, 
-                                    data_root_path=args.data_root_path,
-                                    list_path=args.list_path,
+        if self.args.city_name != "None":
+            target_data_set = CrossCity_Dataset(self.args, 
+                                    data_root_path=self.args.data_root_path,
+                                    list_path=self.args.list_path,
                                     split='val',
-                                    base_size=args.target_base_size,
-                                    crop_size=args.target_crop_size,
-                                    full_eval=args.full_eval,
-                                    class_13=args.class_13)
+                                    base_size=self.args.target_base_size,
+                                    crop_size=self.args.target_crop_size,
+                                    class_13=self.args.class_13)
             self.target_val_dataloader = data.DataLoader(target_data_set,
                                                 batch_size=self.args.batch_size,
                                                 shuffle=False,
@@ -84,19 +95,7 @@ class Evaluater():
         else:
             self.logger.info("This model will run on CPU")
 
-        # load pretrained checkpoint
-        if self.args.pretrained_ckpt_file is not None:
-            path1 = os.path.join(*self.args.checkpoint_dir.split('/')[:-1], self.train_id + 'best.pth')
-            path2 = self.args.pretrained_ckpt_file
-            if os.path.exists(path1):
-                pretrained_ckpt_file = path1
-            elif os.path.exists(path2):
-                pretrained_ckpt_file = path2
-            else:
-                raise AssertionError("no pretrained_ckpt_file")
-            self.load_checkpoint(pretrained_ckpt_file)
-
-        # train
+        # validate
         self.validate()
 
         self.writer.close()
@@ -114,8 +113,6 @@ class Evaluater():
 
             for x, y, id in tqdm_batch:
                 i += 1
-                if self.args.inspect_image:
-                    if i < self.dataloader.valid_iterations-1: pass #continue
                 # y.to(torch.long)
                 if self.cuda:
                     x, y = x.to(self.device), y.to(device=self.device, dtype=torch.long)
@@ -127,11 +124,10 @@ class Evaluater():
                     pred = pred[0]
                     if self.args.multi: 
                         pred_P_2 = F.softmax(pred_2, dim=1)
-                if self.args.multi or self.args.flip or self.args.entropy: 
-                    pred_P = F.softmax(pred, dim=1)
                 y = torch.squeeze(y, 1)
 
                 if self.args.flip:
+                    pred_P = F.softmax(pred, dim=1)
                     def flip(x, dim):
                         dim = x.dim() + dim if dim < 0 else dim
                         inds = tuple(slice(None, None) if i != dim
@@ -150,11 +146,6 @@ class Evaluater():
                     pred = pred.data.cpu().numpy()
                 label = y.cpu().numpy()
                 argpred = np.argmax(pred, axis=1)
-
-                if self.args.inspect_image:
-                    maxpred = np.max(softmax(pred, axis=1), axis=1)
-                    mask = (maxpred > self.args.inspect_ratio)
-                    argpred = np.where(mask, argpred, self.args.num_classes)
 
                 self.Eval.add_batch(label, argpred)
 
@@ -237,18 +228,15 @@ class Evaluater():
             self.logger.info("Loading checkpoint '{}'".format(filename))
             checkpoint = torch.load(filename)
 
-            if 'epoch' in checkpoint:
-                self.current_epoch = checkpoint['epoch']
-                self.current_iter = checkpoint['iteration']
+            if 'state_dict' in checkpoint:
                 self.model.load_state_dict(checkpoint['state_dict'])
-                self.best_MIou = checkpoint['best_MIou']
-
-                self.logger.info("Checkpoint loaded successfully from '{}' at (epoch {}) at (iteration {},MIoU:{})\n"
-                    .format(filename, checkpoint['epoch'], checkpoint['iteration'],
-                            checkpoint['best_MIou']))
             else:
                 self.model.module.load_state_dict(checkpoint)
-                self.logger.info("Checkpoint loaded successfully from "+filename)
+            self.logger.info("Checkpoint loaded successfully from "+filename)
+
+            if 'crop_size' in checkpoint:
+                self.args.crop_size = checkpoint['crop_size']
+                print(checkpoint['crop_size'], self.args.crop_size)
         except OSError as e:
             self.logger.info("No checkpoint exists from '{}'. Skipping...".format(filename))
 
@@ -271,12 +259,15 @@ if __name__ == '__main__':
     if args.split == "train": args.split = "val"
     if args.checkpoint_dir == "none": args.checkpoint_dir = args.pretrained_ckpt_file + "/eval"
     args, train_id, logger = init_args(args)
+    args.batch_size_per_gpu = 2
 
     if args.city_name != "None":
         args.data_root_path = os.path.join(datasets_path['NTHU']['data_root_path'], args.city_name)
-        args.list_path = os.path.join(datasets_path['NTHU']['data_root_path'], args.city_name, 'List')
-        args.target_crop_size = args.crop_size
-        args.target_base_size = args.base_size
+        args.list_path = os.path.join(datasets_path['NTHU']['list_path'], args.city_name, 'List')
+        args.target_crop_size = (1024,512)
+        args.target_base_size = (1024,512)
+    args.crop_size = args.target_crop_size
+    args.base_size = args.target_base_size
 
     agent = Evaluater(args=args, cuda=True, train_id="train_id", logger=logger)
     agent.main()
