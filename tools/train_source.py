@@ -2,7 +2,7 @@
 # @Time    : 2018/11/6 10:08
 # @Author  : HLin
 # @Email   : linhua2017@ia.ac.cn
-# @File    : train_cityscapes.py
+# @File    : train_source.py
 # @Software: PyCharm
 
 import os
@@ -50,6 +50,8 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
+ITER_MAX = 5000
+
 class Trainer():
     def __init__(self, args, cuda=None, train_id="None", logger=None):
         self.args = args
@@ -91,6 +93,7 @@ class Trainer():
             self.optimizer = torch.optim.Adam(params, betas=(0.9, 0.99), weight_decay=self.args.weight_decay)
         # dataloader
         self.dataloader = City_DataLoader(self.args) if self.args.dataset=="cityscapes" else GTA5_DataLoader(self.args)
+        self.dataloader.num_iterations = min(self.dataloader.num_iterations, ITER_MAX)
         print(self.args.iter_max, self.dataloader.num_iterations)
         self.epoch_num = ceil(self.args.iter_max / self.dataloader.num_iterations) if self.args.iter_stop is None else \
                             ceil(self.args.iter_stop / self.dataloader.num_iterations)
@@ -133,23 +136,22 @@ class Trainer():
             self.train_one_epoch()
 
             # validate
-            if self.args.validation == True:
-                PA, MPA, MIoU, FWIoU = self.validate()
-                self.writer.add_scalar('PA', PA, self.current_epoch)
-                self.writer.add_scalar('MPA', MPA, self.current_epoch)
-                self.writer.add_scalar('MIoU', MIoU, self.current_epoch)
-                self.writer.add_scalar('FWIoU', FWIoU, self.current_epoch)
+            PA, MPA, MIoU, FWIoU = self.validate()
+            self.writer.add_scalar('PA', PA, self.current_epoch)
+            self.writer.add_scalar('MPA', MPA, self.current_epoch)
+            self.writer.add_scalar('MIoU', MIoU, self.current_epoch)
+            self.writer.add_scalar('FWIoU', FWIoU, self.current_epoch)
 
-                self.current_MIoU = MIoU
-                is_best = MIoU > self.best_MIou
-                if is_best:
-                    self.best_MIou = MIoU
-                    self.best_iter = self.current_iter
-                    self.logger.info("=>saving a new best checkpoint...")
-                    self.save_checkpoint(self.train_id+'best.pth')
-                else:
-                    self.logger.info("=> The MIoU of val does't improve.")
-                    self.logger.info("=> The best MIoU of val is {} at {}".format(self.best_MIou, self.best_iter))
+            self.current_MIoU = MIoU
+            is_best = MIoU > self.best_MIou
+            if is_best:
+                self.best_MIou = MIoU
+                self.best_iter = self.current_iter
+                self.logger.info("=>saving a new best checkpoint...")
+                self.save_checkpoint(self.train_id+'best.pth')
+            else:
+                self.logger.info("=> The MIoU of val does't improve.")
+                self.logger.info("=> The best MIoU of val is {} at {}".format(self.best_MIou, self.best_iter))
             
             self.current_epoch += 1
 
@@ -587,9 +589,9 @@ def add_train_args(arg_parser):
     arg_parser.add_argument('--momentum', type=float, default=0.9)
     arg_parser.add_argument('--weight_decay', type=float, default=5e-4)
 
-    arg_parser.add_argument('--lr', type=float, default=0.001,
+    arg_parser.add_argument('--lr', type=float, default=2.5e-4,
                             help="init learning rate ")
-    arg_parser.add_argument('--iter_max', type=int, default=100000,
+    arg_parser.add_argument('--iter_max', type=int, default=250000,
                             help="the maxinum of iteration")
     arg_parser.add_argument('--iter_stop', type=int, default=None,
                             help="the early stop step")
@@ -608,7 +610,7 @@ def init_args(args):
     args.batch_size = args.batch_size_per_gpu * ceil(len(args.gpu) / 2)
     print("batch size: ", args.batch_size)
 
-    train_id = str(args.backbone)
+    train_id = str(args.dataset)
 
     crop_size = args.crop_size.split(',')
     base_size = args.base_size.split(',')

@@ -183,7 +183,7 @@ class City_Dataset(data.Dataset):
             if mask: mask = mask.crop((x1, y1, x1 + crop_w, y1 + crop_h))
         elif self.resize:
             img = img.resize(self.crop_size, Image.BICUBIC)
-            if mask: mask = mask.resize(crop_size, Image.NEAREST)
+            if mask: mask = mask.resize(self.crop_size, Image.NEAREST)
         
         if self.gaussian_blur:
             # gaussian blur as in PSP

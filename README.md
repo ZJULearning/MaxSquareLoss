@@ -169,13 +169,15 @@ python3 tools/evaluate.py --gpu "0" --city_name 'Rome' --checkpoint_dir "./log/e
 You can skip this step by downloading the checkpoint pretrained on GTA5 in "Setup" section.
 
 ```
-
+python3 tools/train_source.py --gpu "0" --dataset 'gta5' --checkpoint_dir "./log/gta5_pretrain/" --iter_max 200000 --iter_stop 80000 --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --crop_size "1280,720"
 ```
+
+Then in next step, set `--pretrained_ckpt_file "./log/gta5_pretrain/gta5best.pth"`.
 
 **MaxSquare**
 
 ```
-
+python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "maxsquare" --lr 2.5e-4 --lambda_target 0.1
 ```
 
 **MaxSquare+IW**
@@ -183,6 +185,10 @@ You can skip this step by downloading the checkpoint pretrained on GTA5 in "Setu
 ```
 
 ```
+
+(Optional) Pretrain the multi-level model on the source domain (GTA5) by adding "--multi True". 
+
+Otherwise, download this checkpoint pretrained on GTA5.
 
 **MaxSquare+IW+Multi**
 

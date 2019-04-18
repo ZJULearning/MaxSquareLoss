@@ -19,7 +19,7 @@ from utils.eval import Eval, inspect_decode_labels, softmax
 from datasets.cityscapes_Dataset import City_DataLoader, inv_preprocess, decode_labels, name_classes
 from datasets.gta5_Dataset import GTA5_DataLoader
 from datasets.crosscity_Dataset import CrossCity_Dataset
-from tools.train_cityscapes import *
+from tools.train_source import *
 from utils.train_helper import get_model
 
 class Evaluater():

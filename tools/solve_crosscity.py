@@ -21,7 +21,7 @@ from utils.loss import *
 from datasets.cityscapes_Dataset import City_Dataset, City_DataLoader, inv_preprocess, decode_labels
 from datasets.crosscity_Dataset import CrossCity_Dataset
 
-from tools.train_cityscapes import *
+from tools.train_source import *
 
 class CrossCityTrainer(Trainer):
     def __init__(self, args, cuda=None, train_id="None", logger=None):
@@ -83,17 +83,17 @@ class CrossCityTrainer(Trainer):
         self.dataloader.valid_iterations = (len(target_data_set) + self.args.batch_size) // self.args.batch_size
 
         self.ignore_index = -1
-        if self.args.ST_mode == "hard":
+        if self.args.target_mode == "hard":
             self.target_loss = nn.CrossEntropyLoss(ignore_index= -1)
-        elif self.args.ST_mode == "entropy":
+        elif self.args.target_mode == "entropy":
             self.target_loss = softCrossEntropy(ignore_index= -1)
-        elif self.args.ST_mode == "IW_entropy":
+        elif self.args.target_mode == "IW_entropy":
             self.target_loss = IWsoftCrossEntropy(ignore_index= -1, num_class=self.args.num_classes, ratio=self.args.IW_ratio)
-        elif self.args.ST_mode == "maxsquare":
+        elif self.args.target_mode == "maxsquare":
             self.target_loss = MaxSquareloss(ignore_index= -1, num_class=self.args.num_classes)
-        elif self.args.ST_mode == "IW_maxsquare":
+        elif self.args.target_mode == "IW_maxsquare":
             self.target_loss = IW_MaxSquareloss(ignore_index= -1, num_class=self.args.num_classes, ratio=self.args.IW_ratio)
-        elif self.args.ST_mode == "scaled_entropy":
+        elif self.args.target_mode == "scaled_entropy":
             self.target_loss = ScaledsoftCrossEntropy(ignore_index= -1, gamma=self.args.gamma)
         
         self.target_loss.to(self.device)
@@ -128,6 +128,7 @@ class CrossCityTrainer(Trainer):
             self.load_checkpoint(os.path.join(self.args.checkpoint_dir, self.train_id + 'best.pth'))
         
         self.args.iter_max = self.dataloader.num_iterations*self.args.epoch_num
+        self.epoch_num = self.args.epoch_num
         # train
         #self.validate() # check image summary
         #self.validate_source()
@@ -143,9 +144,9 @@ class CrossCityTrainer(Trainer):
         # Set the model to be in training mode (for batchnorm and dropout)
 
         loss_seg_value = 0
-        loss_ST_value = 0
+        loss_target_value = 0
         loss_seg_value_2 = 0
-        loss_ST_value_2 = 0
+        loss_target_value_2 = 0
         iter_num = self.dataloader.num_iterations
 
         if self.args.freeze_bn:
@@ -205,7 +206,7 @@ class CrossCityTrainer(Trainer):
                 pred_P_2 = F.softmax(pred_2, dim=1)
             pred_P = F.softmax(pred, dim=1)
 
-            if self.args.ST_mode == "hard":
+            if self.args.target_mode == "hard":
                 label = torch.argmax(pred_P.detach(), dim=1)
                 if self.args.multi: label_2 = torch.argmax(pred_P_2.detach(), dim=1)
             else:
@@ -215,13 +216,13 @@ class CrossCityTrainer(Trainer):
             maxpred, argpred = torch.max(pred_P.detach(), dim=1)
             if self.args.multi: maxpred_2, argpred_2 = torch.max(pred_P_2.detach(), dim=1)
 
-            if self.args.ST_mode == "hard":
+            if self.args.target_mode == "hard":
                 mask = (maxpred > self.threshold)
                 label = torch.where(mask, label, torch.ones(1).to(self.device, dtype=torch.long)*self.ignore_index)
             
-            loss_ST = self.args.lambda_ST*self.target_loss(pred, label)
+            loss_target = self.args.lambda_target*self.target_loss(pred, label)
 
-            loss_ST_ = loss_ST
+            loss_target_ = loss_target
 
             ######################################
             # Multi-level Self-produced Guidance #
@@ -232,52 +233,52 @@ class CrossCityTrainer(Trainer):
                 mask = (maxpred > self.threshold) | (maxpred_2 > self.threshold)
 
                 label_2 = torch.where(mask, argpred_c, torch.ones(1).to(self.device, dtype=torch.long)*self.ignore_index)
-                loss_ST_2 = self.args.lambda_seg * self.args.lambda_ST*self.target_hard_loss(pred_2, label_2)
-                loss_ST_ += loss_ST_2
-                loss_ST_value_2 += loss_ST_2 / iter_num
+                loss_target_2 = self.args.lambda_seg * self.args.lambda_target*self.target_hard_loss(pred_2, label_2)
+                loss_target_ += loss_target_2
+                loss_target_value_2 += loss_target_2 / iter_num
 
-            loss_ST_.backward()
-            loss_ST_value += loss_ST / iter_num
+            loss_target_.backward()
+            loss_target_value += loss_target / iter_num
 
             self.optimizer.step()
             self.optimizer.zero_grad()
 
             if batch_idx % 400 == 0:
                 if self.args.multi:
-                    self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_ST={:.3f}; loss_seg_2={:.3f}-loss_ST_2={:.3f}".format(self.current_epoch,
-                                                                           batch_idx, loss.item(), loss_ST.item(), loss_2.item(), loss_ST_2.item()))
+                    self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_target={:.3f}; loss_seg_2={:.3f}-loss_target_2={:.3f}".format(self.current_epoch,
+                                                                           batch_idx, loss.item(), loss_target.item(), loss_2.item(), loss_target_2.item()))
                 else:
-                    self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_ST={:.3f}".format(self.current_epoch,
-                                                                           batch_idx, loss.item(), loss_ST.item()))
+                    self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_target={:.3f}".format(self.current_epoch,
+                                                                           batch_idx, loss.item(), loss_target.item()))
             batch_idx += 1
 
             self.current_iter += 1
         
         self.writer.add_scalar('train_loss', loss_seg_value, self.current_epoch)
         tqdm.write("The average loss of train epoch-{}-:{}".format(self.current_epoch, loss_seg_value))
-        self.writer.add_scalar('ST_loss', loss_ST_value, self.current_epoch)
-        tqdm.write("The average ST_loss of train epoch-{}-:{:.3f}".format(self.current_epoch, loss_ST_value))
+        self.writer.add_scalar('target_loss', loss_target_value, self.current_epoch)
+        tqdm.write("The average target_loss of train epoch-{}-:{:.3f}".format(self.current_epoch, loss_target_value))
         if self.args.multi:
             self.writer.add_scalar('train_loss_2', loss_seg_value_2, self.current_epoch)
             tqdm.write("The average loss_2 of train epoch-{}-:{}".format(self.current_epoch, loss_seg_value_2))
-            self.writer.add_scalar('ST_loss_2', loss_ST_value_2, self.current_epoch)
-            tqdm.write("The average ST_loss_2 of train epoch-{}-:{:.3f}".format(self.current_epoch, loss_ST_value_2))
+            self.writer.add_scalar('target_loss_2', loss_target_value_2, self.current_epoch)
+            tqdm.write("The average target_loss_2 of train epoch-{}-:{:.3f}".format(self.current_epoch, loss_target_value_2))
         tqdm_epoch.close()
         
         #eval on source domain
         self.validate_source()
 
-def add_ST_train_args(arg_parser):
+def add_UDA_train_args(arg_parser):
     arg_parser.add_argument('--city_name', default='Rio', type=str,
                             help='source dataset choice')
     arg_parser.add_argument('--source_dataset', default='cityscapes', type=str,
                             help='source dataset choice')
     arg_parser.add_argument('--epoch_num', type=int, default=10,
                             help="num round") 
-    arg_parser.add_argument('--ST_mode', type=str, default="maxsquare",
-                            help="ST_mode")
-    arg_parser.add_argument('--lambda_ST', type=float, default=0.1,
-                            help="lambda_ST")
+    arg_parser.add_argument('--target_mode', type=str, default="maxsquare",
+                            help="target_mode")
+    arg_parser.add_argument('--lambda_target', type=float, default=0.1,
+                            help="lambda_target")
     arg_parser.add_argument('--gamma', type=float, default=0, 
                             help='scaled entorpy')
     arg_parser.add_argument('--IW_ratio', type=float, default=0.2, 
@@ -289,7 +290,7 @@ if __name__ == '__main__':
 
     arg_parser = argparse.ArgumentParser()
     arg_parser = add_train_args(arg_parser)
-    arg_parser = add_ST_train_args(arg_parser)
+    arg_parser = add_UDA_train_args(arg_parser)
 
     args = arg_parser.parse_args()
     args, train_id, logger = init_args(args)
