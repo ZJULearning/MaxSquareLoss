@@ -4,7 +4,7 @@ By Minghao Chen, Hongyang Xue, Deng Cai.
 
 ## Introduction
 
-A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segmentation with Maximum Squares Loss"](). The segmentation model is based on Deeplabv2 with ResNet-101 backbone. "MaxSquare+IW+Multi" introduced in the paper achieve competitive result on all three UDA datasets: GTA5, SYNTHIA, NTHU. Moreover, our method achieves the state-of-the-art results in GTA5-to-Cityscapes and Cityscapes-to-NTHU adaptation.
+A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segmentation with Maximum Squares Loss"](). The segmentation model is based on Deeplabv2 with ResNet-101 backbone. "MaxSquare+IW+Multi" introduced in the paper achieve competitive result on all three UDA datasets: GTA5, SYNTHIA, NTHU dataset. Moreover, our method achieves the state-of-the-art results in GTA5-to-Cityscapes and Cityscapes-to-NTHU adaptation.
 
 ### Citation
 
@@ -41,37 +41,37 @@ pip install -r requirements.txt
 
 #### Cityscapes-to-NTHU
 
-- Download [**NTHU dataset**](https://yihsinchen.github.io/segmentation_adaptation_dataset/), which consists 2048 × 1024 resolution from four different cities: Rio,
-  Rome, Tokyo, and Taipei. We resize images to 1024x512, the same as Cityscapes.
+- Download [**NTHU dataset**](https://yihsinchen.github.io/segmentation_adaptation_dataset/), which consists of images with 2048 × 1024 resolution from four different cities: Rio, Rome, Tokyo, and Taipei. We resize images to 1024x512, the same as Cityscapes.
 - Download the **[checkpoint](https://drive.google.com/open?id=1QMpj7sPqsVwYldedZf8A5S2pT-4oENEn)** pretrained on Cityscapes.
 
-Put all datasets in "datasets" folder and all checkpoints in "pretrained_model" folder.
+Put all datasets into "datasets" folder and all checkpoints into "pretrained_model" folder.
 
 ## Results
 
 We present several transfered results reported in our paper and provide the corresponding checkpoints.
 
-#### GTA5-to-Cityscapes:
+### GTA5-to-Cityscapes:
 
-| Method  | Source | [MinEnt](https://drive.google.com/open?id=16ll3i7YjWPLQC03IOoM6njDDJ8MCV-Ji)$^\dagger$ | [MaxSquare](https://drive.google.com/open?id=1KmM8zBD1G1XTmzaV_I_aJgi9DW-49kxc) | [MaxSquare+IW](https://drive.google.com/open?id=11oliS-Vu2W6dB8W9ZvqlN0R4cC4Pb8i6) | [MaxSquare+IW+Multi](https://drive.google.com/open?id=1YwK68IMmWHZnAL8FU9ZY-Le34P80Kf86) |
+| Method  | Source | [MinEnt$^\dagger$](https://drive.google.com/open?id=16ll3i7YjWPLQC03IOoM6njDDJ8MCV-Ji) | [MaxSquare](https://drive.google.com/open?id=1KmM8zBD1G1XTmzaV_I_aJgi9DW-49kxc) | [MaxSquare+IW](https://drive.google.com/open?id=11oliS-Vu2W6dB8W9ZvqlN0R4cC4Pb8i6) | [MaxSquare+IW+Multi](https://drive.google.com/open?id=1YwK68IMmWHZnAL8FU9ZY-Le34P80Kf86) |
 | :-----: | :----: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | mIoU(%) |  36.9  |                             42.2                             |                             44.3                             |                             45.2                             |                             46.4                             |
 
 To get above results, download corresponding checkpoints and put them to "pretrained_model/checkpoint" folder. Use the following code to evaluate.
 
-**MaxSquare**
+- MaxSquare
 
 ```
 python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare.pth" --image_summary True
 ```
 
-**MaxSquare+IW**
+- MaxSquare+IW
 
 ```
 python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare_IW.pth" --image_summary True
 ```
 
-**MaxSquare+IW+Multi**
+- MaxSquare+IW+Multi
+
 
 ```
 python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/GTA5_to_Cityscapes_MaxSquare_IW_Multi.pth" --image_summary True
@@ -91,26 +91,27 @@ tensorboard --logdir=./log/eval_city  --port=6009
 
 
 
-#### SYNTHIA-to-Cityscapes:
+### SYNTHIA-to-Cityscapes:
 
-|  Method  | Source | [MinEnt](https://drive.google.com/open?id=1nTE7se32AHe1OjMEt4tESmOEtSckTaAC)$^\dagger$ | [MaxSquare](https://drive.google.com/open?id=14teX0PB5LB56sIGcXAG8d2TLLNStCA65) | [MaxSquare+IW](https://drive.google.com/open?id=1euz8aSln-qbWEbI6A2JLvkboNuHtubv4) | [MaxSquare+IW+Multi](https://drive.google.com/open?id=1Goicer8txPdP83mZ4I96RjJ0myvLGaAS) |
+|  Method  | Source | [MinEnt$^\dagger$](https://drive.google.com/open?id=1nTE7se32AHe1OjMEt4tESmOEtSckTaAC) | [MaxSquare](https://drive.google.com/open?id=14teX0PB5LB56sIGcXAG8d2TLLNStCA65) | [MaxSquare+IW](https://drive.google.com/open?id=1euz8aSln-qbWEbI6A2JLvkboNuHtubv4) | [MaxSquare+IW+Multi](https://drive.google.com/open?id=1Goicer8txPdP83mZ4I96RjJ0myvLGaAS) |
 | :------: | :----: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | mIoU(%)  |  30.1  |                             38.0                             |                             39.3                             |                             40.4                             |                             41.4                             |
 | mIoU*(%) |  34.3  |                             44.5                             |                             45.8                             |                             46.9                             |                             48.2                             |
 
-**MaxSquare**
+- MaxSquare
 
 ```
 python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/synthia_to_Cityscapes_MaxSquare.pth" --image_summary True  --num_classes 16
 ```
 
-**MaxSquare+IW**
+- MaxSquare+IW
 
 ```
 python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/synthia_to_Cityscapes_MaxSquare_IW.pth" --image_summary True  --num_classes 16
 ```
 
-**MaxSquare+IW+Multi**
+- MaxSquare+IW+Multi
+
 
 ```
 python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./pretrained_model/checkpoint/synthia_to_Cityscapes_MaxSquare_IW_Multi.pth" --image_summary True --flip True --num_classes 16
@@ -118,7 +119,7 @@ python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'citysc
 
 
 
-#### Cityscapes-to-NTHU
+### Cityscapes-to-NTHU
 
 ##### **Rome**
 
@@ -146,13 +147,13 @@ python3 tools/evaluate.py --gpu "0" --source_dataset 'synthia' --dataset 'citysc
 
 Evaluation (take "Rome" for example):
 
-**MaxSquare**
+- MaxSquare
 
 ```
 python3 tools/evaluate.py --gpu "0" --city_name 'Rome' --checkpoint_dir "./log/eval_Rome" --pretrained_ckpt_file "./pretrained_model/checkpoint/Cityscapes_to_Rome_MaxSquare.pth" --image_summary True  --num_classes 13
 ```
 
-**MaxSquare+IW**
+- MaxSquare+IW
 
 ```
 python3 tools/evaluate.py --gpu "0" --city_name 'Rome' --checkpoint_dir "./log/eval_Rome" --pretrained_ckpt_file "./pretrained_model/checkpoint/Cityscapes_to_Rome_MaxSquare_IW.pth" --image_summary True  --num_classes 13
@@ -162,7 +163,7 @@ python3 tools/evaluate.py --gpu "0" --city_name 'Rome' --checkpoint_dir "./log/e
 
 ## Training
 
-#### GTA5-to-Cityscapes:
+### GTA5-to-Cityscapes:
 
 (Optional) Pretrain the model on the source domain (GTA5). 
 
@@ -174,13 +175,15 @@ python3 tools/train_source.py --gpu "0" --dataset 'gta5' --checkpoint_dir "./log
 
 Then in next step, set `--pretrained_ckpt_file "./log/gta5_pretrain/gta5best.pth"`.
 
-**MaxSquare**
+- MaxSquare
+
 
 ```
 python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "maxsquare" --lr 2.5e-4 --lambda_target 0.1
 ```
 
-**MaxSquare+IW**
+- MaxSquare+IW
+
 
 ```
 python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare_IW/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "IW_maxsquare" --lr 2.5e-4 --lambda_target 0.1 --IW_ratio 0.2
@@ -190,7 +193,7 @@ python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'citysc
 
 Otherwise, download this **[checkpoint](https://drive.google.com/open?id=16wtgTV9gxkhUyP0Att0mSllq2JKH6DAM)** pretrained on GTA5.
 
-**MaxSquare+IW+Multi**
+- MaxSquare+IW+Multi
 
 ```
 python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare_IW_multi/" --pretrained_ckpt_file "./pretrained_model/GTA5_source_multi.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "IW_maxsquare" --lr 2.5e-4 --lambda_target 0.1 --IW_ratio 0.2 --multi True --lambda_seg 0.1
@@ -198,7 +201,7 @@ python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'citysc
 
 
 
-#### **SYNTHIA-to-Cityscapes:**
+### **SYNTHIA-to-Cityscapes:**
 
 (Optional) Pretrain the model on the source domain (SYNTHIA). 
 
@@ -206,7 +209,8 @@ python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'citysc
 python3 tools/train_source.py --gpu "0" --dataset 'synthia' --checkpoint_dir "./log/synthia_pretrain/" --iter_max 200000 --iter_stop 80000 --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --crop_size "1280,760" --num_classes 16
 ```
 
-**MaxSquare** (example)
+- MaxSquare (example)
+
 
 ```
 python3 tools/solve_gta5.py --gpu "0" --source_dataset 'synthia'  --dataset 'cityscapes'   --checkpoint_dir "./log/synthia2city_maxsquare/" --pretrained_ckpt_file "./pretrained_model/synthia_source.pth"  --crop_size "1280,760" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "maxsquare" --lr 2.5e-4 --lambda_target 0.1 --num_classes 16
@@ -214,7 +218,7 @@ python3 tools/solve_gta5.py --gpu "0" --source_dataset 'synthia'  --dataset 'cit
 
 
 
-#### Cityscapes-to-NTHU
+### Cityscapes-to-NTHU
 
 (Optional) Pretrain the model on the source domain (Cityscapes). 
 
@@ -222,7 +226,7 @@ python3 tools/solve_gta5.py --gpu "0" --source_dataset 'synthia'  --dataset 'cit
 python3 tools/train_source.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/cityscapes_pretrain_class13/" --iter_max 200000 --iter_stop 80000 --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --crop_size "1024,512" --num_classes 13
 ```
 
-**MaxSquare** (take "Rome" for example)
+- MaxSquare (take "Rome" for example)
 
 ```
 python3 tools/solve_crosscity.py --gpu "0" --city_name 'Rome' --source_dataset 'cityscapes' --checkpoint_dir "./log/city2Rome_maxsquare/" --pretrained_ckpt_file "./pretrained_model/Cityscapes_source_class13.pth"  --crop_size "1024,512" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "maxsquare" --lr 2.5e-4 --lambda_target 0.1 --num_classes 13
@@ -234,4 +238,4 @@ python3 tools/solve_crosscity.py --gpu "0" --city_name 'Rome' --source_dataset '
 
 The structure of this code is largely based on [this repo](https://github.com/hualin95/Deeplab-v3plus).
 
-The deeplabv2 model is borrowed from [Pytorch-Deeplab](https://github.com/speedinghzl/Pytorch-Deeplab).
+Deeplabv2 model is borrowed from [Pytorch-Deeplab](https://github.com/speedinghzl/Pytorch-Deeplab).
