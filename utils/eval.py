@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2018/10/8 13:30
-# @Author  : HLin
-# @Email   : linhua2017@ia.ac.cn
-# @File    : eval.py
-# @Software: PyCharm
-
 import os
 import time
 import numpy as np
@@ -129,42 +122,6 @@ class Eval():
 
     def reset(self):
         self.confusion_matrix = np.zeros((self.num_class,) * 2)
-
-from PIL import Image
-from datasets.cityscapes_Dataset import label_colours, NUM_CLASSES
-def inspect_decode_labels(pred, num_images=1, num_classes=NUM_CLASSES, 
-        inspect_split=[0.9, 0.8, 0.7, 0.5, 0.0], inspect_ratio=[1.0, 0.8, 0.6, 0.3]):
-    """Decode batch of segmentation masks.
-    
-    Args:
-      pred: result of inference.
-      num_images: number of images to decode from the batch.
-      num_classes: number of classes to predict (including background).
-    
-    Returns:
-      A batch with num_images RGB images of the same size as the input. 
-    """
-    if isinstance(pred, torch.Tensor):
-        pred = pred.data.cpu().numpy()
-    n, c, h, w = pred.shape
-    pred = pred.transpose([0, 2, 3, 1])
-    if n < num_images: 
-        num_images = n
-    outputs = np.zeros((num_images, h, w, 3), dtype=np.uint8)
-    for i in range(num_images):
-      img = Image.new('RGB', (w, h))
-      pixels = img.load()
-      for j_, j in enumerate(pred[i, :, :, :]):
-          for k_, k in enumerate(j):
-              assert k.shape[0] == num_classes
-              k_value = np.max(softmax(k))
-              k_class = np.argmax(k)
-              for it, iv in enumerate(inspect_split):
-                  if k_value > iv: break
-              if iv > 0:
-                pixels[k_,j_] = tuple(map(lambda x: int(inspect_ratio[it]*x), label_colours[k_class]))
-      outputs[i] = np.array(img)
-    return torch.from_numpy(outputs.transpose([0, 3, 1, 2]).astype('float32')).div_(255.0)
 
 def softmax(k, axis=None):
     exp_k = np.exp(k)

@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2018/11/6 10:08
-# @Author  : HLin
-# @Email   : linhua2017@ia.ac.cn
-# @File    : train_source.py
-# @Software: PyCharm
-
 import os
 import random
 import logging
@@ -27,6 +20,7 @@ from utils.train_helper import get_model
 
 from datasets.cityscapes_Dataset import City_Dataset, City_DataLoader, inv_preprocess, decode_labels
 from datasets.gta5_Dataset import GTA5_DataLoader
+from datasets.synthia_Dataset import SYNTHIA_DataLoader
 
 
 datasets_path={
@@ -92,7 +86,12 @@ class Trainer():
         elif self.args.optim == "Adam":
             self.optimizer = torch.optim.Adam(params, betas=(0.9, 0.99), weight_decay=self.args.weight_decay)
         # dataloader
-        self.dataloader = City_DataLoader(self.args) if self.args.dataset=="cityscapes" else GTA5_DataLoader(self.args)
+        if self.args.dataset=="cityscapes":
+            self.dataloader = City_DataLoader(self.args)  
+        elif self.args.dataset=="gta5":
+            self.dataloader = GTA5_DataLoader(self.args)
+        else:
+            self.dataloader = SYNTHIA_DataLoader(self.args)
         self.dataloader.num_iterations = min(self.dataloader.num_iterations, ITER_MAX)
         print(self.args.iter_max, self.dataloader.num_iterations)
         self.epoch_num = ceil(self.args.iter_max / self.dataloader.num_iterations) if self.args.iter_stop is None else \
@@ -252,7 +251,7 @@ class Trainer():
         tqdm_epoch.close()
 
     def log_one_train_epoch(self, x, label, argpred, train_loss):
-        #show train image
+        #show train image on tensorboard
         images_inv = inv_preprocess(x.clone().cpu(), self.args.show_num_images, numpy_transform=self.args.numpy_transform)
         labels_colors = decode_labels(label, self.args.show_num_images)
         preds_colors = decode_labels(argpred, self.args.show_num_images)
@@ -315,7 +314,7 @@ class Trainer():
                 self.Eval.add_batch(label, argpred)
                 
 
-            #show val result
+            #show val result on tensorboard
             images_inv = inv_preprocess(x.clone().cpu(), self.args.show_num_images, numpy_transform=self.args.numpy_transform)
             labels_colors = decode_labels(label, self.args.show_num_images)
             preds_colors = decode_labels(argpred, self.args.show_num_images)
@@ -395,20 +394,12 @@ class Trainer():
                 argpred = np.argmax(pred, axis=1)
 
                 self.Eval.add_batch(label, argpred)
-                if self.args.multi:
-                    pred_2 = pred_2.data.cpu().numpy()
-                    argpred_2 = np.argmax(pred_2, axis=1)
-                    self.Eval_2.add_batch(label, argpred_2)
 
-                    pred_c = (pred_P+pred_P_2)/2
-                    pred_c = pred_c.data.cpu().numpy()
-                    argpred_c = np.argmax(pred_c, axis=1)
-                    self.Eval_c.add_batch(label, argpred_c)
                 i += 1
                 if i == self.dataloader.valid_iterations:
                     break
 
-            #show val result
+            #show val result on tensorboard
             images_inv = inv_preprocess(x.clone().cpu(), self.args.show_num_images, numpy_transform=self.args.numpy_transform)
             labels_colors = decode_labels(label, self.args.show_num_images)
             preds_colors = decode_labels(argpred, self.args.show_num_images)
@@ -416,10 +407,6 @@ class Trainer():
                 self.writer.add_image('source_eval/'+str(index)+'/Images', img, self.current_epoch)
                 self.writer.add_image('source_eval/'+str(index)+'/Labels', lab, self.current_epoch)
                 self.writer.add_image('source_eval/'+str(index)+'/preds', color_pred, self.current_epoch)
-            if self.args.inspect_image:
-                preds_colors = inspect_decode_labels(pred, self.args.show_num_images)
-                for index, (img, lab, color_pred) in enumerate(zip(images_inv, labels_colors, preds_colors)):
-                    self.writer.add_image('source_eval/'+str(index)+'/inspect_preds', color_pred, self.current_epoch)
 
             if self.args.class_16:
                 def source_val_info(Eval, name):
@@ -603,7 +590,7 @@ def add_train_args(arg_parser):
     arg_parser.add_argument('--multi', default=False, type=str2bool,
                         help='output model middle feature')
     arg_parser.add_argument('--lambda_seg', type=float, default=0.1,
-                        help="lambda_seg of middle feature")
+                        help="lambda_seg of middle output")
     return arg_parser
 
 def init_args(args):
@@ -649,7 +636,7 @@ def init_args(args):
     # logger configure
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    fh = logging.FileHandler(os.path.join(args.checkpoint_dir, train_id+'.txt'))
+    fh = logging.FileHandler(os.path.join(args.checkpoint_dir, 'train_log.txt'))
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)

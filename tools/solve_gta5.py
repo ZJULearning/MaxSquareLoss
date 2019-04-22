@@ -149,8 +149,8 @@ class STTrainer(Trainer):
         self.epoch_num = self.args.epoch_num
 
         # train
-        #self.validate() # check image summary
-        #self.validate_source()
+        self.validate() # check image summary
+        self.validate_source()
         self.train()
 
         self.writer.close()
@@ -205,9 +205,9 @@ class STTrainer(Trainer):
             loss_.backward()
             loss_seg_value += loss.cpu().item() / iter_num
             
-            ##################
-            # target ST loss #
-            ##################
+            ###############
+            # target loss #
+            ###############
             # train with target
             x, _, _ = batch_t
             if self.cuda:
@@ -284,19 +284,21 @@ class STTrainer(Trainer):
 
 def add_UDA_train_args(arg_parser):
     arg_parser.add_argument('--source_dataset', default='gta5', type=str,
+                            choices=['gta5', 'synthia'],
                             help='source dataset choice')
     arg_parser.add_argument('--source_split', default='train', type=str,
-                            help='source_split')
+                            help='source datasets split')
     arg_parser.add_argument('--epoch_num', type=int, default=10,
-                            help="num round")                     
+                            help="number of training epochs")                     
     arg_parser.add_argument('--target_mode', type=str, default="maxsquare",
-                            help="target_mode")
+                            choices=['maxsquare', 'IW_maxsquare', 'entropy', 'IW_entropy'],
+                            help="the loss function on target domain")
     arg_parser.add_argument('--lambda_target', type=float, default=0.1,
-                            help="lambda_target")
+                            help="lambda of target loss")
     arg_parser.add_argument('--gamma', type=float, default=0, 
-                            help='scaled entorpy')
+                            help='parameter for scaled entorpy')
     arg_parser.add_argument('--IW_ratio', type=float, default=0.2, 
-                            help='IW_ratio')
+                            help='the ratio of image-wise weighting factor')
     arg_parser.add_argument('--threshold', type=float, default=0.98,
                             help="threshold for Self-produced guidance")
     return arg_parser
@@ -315,7 +317,7 @@ if __name__ == '__main__':
 
     args.target_dataset = args.dataset
 
-    train_id = train_id+"2"+str(args.target_dataset)+"_"+args.target_mode
+    train_id = str(args.source_dataset)+"2"+str(args.target_dataset)+"_"+args.target_mode
 
     agent = STTrainer(args=args, cuda=True, train_id=train_id, logger=logger)
     agent.main()

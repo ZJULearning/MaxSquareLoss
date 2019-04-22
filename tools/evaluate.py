@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import random
 import logging
@@ -113,7 +112,6 @@ class Evaluater():
 
             for x, y, id in tqdm_batch:
                 i += 1
-                # y.to(torch.long)
                 if self.cuda:
                     x, y = x.to(self.device), y.to(device=self.device, dtype=torch.long)
 
@@ -153,7 +151,7 @@ class Evaluater():
                     break
                 
                 if i % 20 ==0 and self.args.image_summary:
-                    #show val result
+                    #show val result on tensorboard
                     images_inv = inv_preprocess(x.clone().cpu(), self.args.show_num_images, numpy_transform=self.args.numpy_transform)
                     labels_colors = decode_labels(label, self.args.show_num_images)
                     preds_colors = decode_labels(argpred, self.args.show_num_images)
@@ -161,7 +159,7 @@ class Evaluater():
                         self.writer.add_image('eval/'+ str(index)+'/Images', img, self.current_epoch)
                         self.writer.add_image('eval/'+ str(index)+'/Labels', lab, self.current_epoch)
                         self.writer.add_image('eval/'+ str(index)+'/preds', color_pred, self.current_epoch)
-            #show val result
+            #show val result on tensorboard
             if self.args.image_summary:
                 images_inv = inv_preprocess(x.clone().cpu(), self.args.show_num_images, numpy_transform=self.args.numpy_transform)
                 labels_colors = decode_labels(label, self.args.show_num_images)
@@ -173,6 +171,7 @@ class Evaluater():
                     if self.args.multi:
                         self.writer.add_image('a'+ str(index)+'/preds_2', preds_colors_2[index], self.current_epoch)
                         self.writer.add_image('a'+ str(index)+'/preds_c', preds_colors_c[index], self.current_epoch)
+            # get eval result
             if self.args.class_16:
                 def val_info(Eval, name):
                     PA = Eval.Pixel_Accuracy()
@@ -186,21 +185,6 @@ class Evaluater():
                                                                                                 MIoU_16, FWIoU_16, PC_16))
                     self.logger.info('\nEpoch:{:.3f}, {} PA:{:.3f}, MPA_13:{:.3f}, MIoU_13:{:.3f}, FWIoU_13:{:.3f}, PC_13:{:.3f}'.format(self.current_epoch, name, PA, MPA_13,
                                                                                                 MIoU_13, FWIoU_13, PC_13))
-                    return PA, MPA_13, MIoU_13, FWIoU_13
-            elif self.args.source_dataset == 'synthia':
-                def val_info(Eval, name):
-                    PA = Eval.Pixel_Accuracy()
-                    MPA_16, MPA_13 = Eval.Mean_Pixel_Accuracy(out_16_13=True)
-                    MIoU_16, MIoU_13 = Eval.Mean_Intersection_over_Union(out_16_13=True)
-                    FWIoU_16, FWIoU_13 = Eval.Frequency_Weighted_Intersection_over_Union(out_16_13=True)
-                    PC_16, PC_13 = Eval.Mean_Precision(out_16_13=True)
-                    print("########## Eval{} ############".format(name))
-
-                    self.logger.info('\nEpoch:{:.3f}, {} PA:{:.3f}, MPA_16:{:.3f}, MIoU_16:{:.3f}, FWIoU_16:{:.3f}, PC_16:{:.3f}'.format(self.current_epoch, name, PA, MPA_16,
-                                                                                                MIoU_16, FWIoU_16, PC_16))
-                    self.logger.info('\nEpoch:{:.3f}, {} PA:{:.3f}, MPA_13:{:.3f}, MIoU_13:{:.3f}, FWIoU_13:{:.3f}, PC_13:{:.3f}'.format(self.current_epoch, name, PA, MPA_13,
-                                                                                                MIoU_13, FWIoU_13, PC_13))
-                    self.Eval.Print_Every_class_Eval(out_16_13=True)
                     return PA, MPA_13, MIoU_13, FWIoU_13
             else:
                 def val_info(Eval, name):

@@ -91,9 +91,11 @@ class City_Dataset(data.Dataset):
                               14: ignore_label, 15: ignore_label, 16: ignore_label, 17: 5,
                               18: ignore_label, 19: 6, 20: 7, 21: 8, 22: 9, 23: 10, 24: 11, 25: 12, 26: 13, 27: 14,
                               28: 15, 29: ignore_label, 30: ignore_label, 31: 16, 32: 17, 33: 18}
+        # In SYNTHIA-to-Cityscapes case, only consider 16 shared classes
         self.class_16 = class_16
         synthia_set_16 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18]
         self.trainid_to_16id = {id:i for i,id in enumerate(synthia_set_16)}
+        # In Cityscapes-to-NTHU case, only consider 13 shared classes
         self.class_13 = class_13
         synthia_set_13 = [0, 1, 2, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18]
         self.trainid_to_13id = {id:i for i,id in enumerate(synthia_set_13)}
@@ -374,3 +376,38 @@ name_classes = [
     'bicycle',
     'unlabeled'
 ]
+
+def inspect_decode_labels(pred, num_images=1, num_classes=NUM_CLASSES, 
+        inspect_split=[0.9, 0.8, 0.7, 0.5, 0.0], inspect_ratio=[1.0, 0.8, 0.6, 0.3]):
+    """Decode batch of segmentation masks accroding to the prediction probability.
+    
+    Args:
+      pred: result of inference.
+      num_images: number of images to decode from the batch.
+      num_classes: number of classes to predict (including background).
+      inspect_split: probability between different split has different brightness.
+    
+    Returns:
+      A batch with num_images RGB images of the same size as the input. 
+    """
+    if isinstance(pred, torch.Tensor):
+        pred = pred.data.cpu().numpy()
+    n, c, h, w = pred.shape
+    pred = pred.transpose([0, 2, 3, 1])
+    if n < num_images: 
+        num_images = n
+    outputs = np.zeros((num_images, h, w, 3), dtype=np.uint8)
+    for i in range(num_images):
+      img = Image.new('RGB', (w, h))
+      pixels = img.load()
+      for j_, j in enumerate(pred[i, :, :, :]):
+          for k_, k in enumerate(j):
+              assert k.shape[0] == num_classes
+              k_value = np.max(softmax(k))
+              k_class = np.argmax(k)
+              for it, iv in enumerate(inspect_split):
+                  if k_value > iv: break
+              if iv > 0:
+                pixels[k_,j_] = tuple(map(lambda x: int(inspect_ratio[it]*x), label_colours[k_class]))
+      outputs[i] = np.array(img)
+    return torch.from_numpy(outputs.transpose([0, 3, 1, 2]).astype('float32')).div_(255.0)

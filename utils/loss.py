@@ -13,6 +13,12 @@ class IW_MaxSquareloss(nn.Module):
         self.ratio = ratio
     
     def forward(self, pred, prob, label=None):
+        """
+        :param pred: predictions (N, C, H, W)
+        :param prob: probability of pred (N, C, H, W)
+        :param label(optional): the map for counting label numbers (N, C, H, W)
+        :return: maximum squares loss with image-wise weighting factor
+        """
         # prob -= 0.5
         N, C, H, W = prob.size()
         mask = (prob != self.ignore_index)
@@ -43,9 +49,14 @@ class MaxSquareloss(nn.Module):
         self.num_class = num_class
     
     def forward(self, pred, prob):
+        """
+        :param pred: predictions (N, C, H, W)
+        :param prob: probability of pred (N, C, H, W)
+        :return: maximum squares loss
+        """
         # prob -= 0.5
         mask = (prob != self.ignore_index)    
-        loss = -torch.mean(torch.pow(prob, 2)[mask])
+        loss = -torch.mean(torch.pow(prob, 2)[mask])/2
         return loss
 
 class ScaledsoftCrossEntropy(nn.Module):
@@ -58,7 +69,7 @@ class ScaledsoftCrossEntropy(nn.Module):
     def forward(self, inputs, target):
         """
         :param inputs: predictions (N, C, H, W)
-        :param target: target labels (N, C, H, W)
+        :param target: target distribution (N, C, H, W)
         :return: loss
         """
         assert inputs.size() == target.size()
@@ -82,7 +93,7 @@ class softCrossEntropy(nn.Module):
     def forward(self, inputs, target):
         """
         :param inputs: predictions (N, C, H, W)
-        :param target: target labels (N, C, H, W)
+        :param target: target distribution (N, C, H, W)
         :return: loss
         """
         assert inputs.size() == target.size()
@@ -105,8 +116,8 @@ class IWsoftCrossEntropy(nn.Module):
     def forward(self, inputs, target):
         """
         :param inputs: predictions (N, C, H, W)
-        :param target: target labels (N, C, H, W)
-        :return: loss
+        :param target: target distribution (N, C, H, W)
+        :return: loss with image-wise weighting factor
         """
         assert inputs.size() == target.size()
         mask = (target != self.ignore_index)

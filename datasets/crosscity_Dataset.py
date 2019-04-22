@@ -58,6 +58,7 @@ class CrossCity_Dataset(City_Dataset):
                               19: 6, 20: 7, 21: 8, 22: 9, 23: 10, 24: 11, 25: 12,
                               26: 13, 27: 14, 28: 15, 31: 16, 32: 17, 33: 18}
         self.class_16 = False
+        # only consider 13 shared classes
         self.class_13 = class_13
         synthia_set_13 = [0, 1, 2, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18]
         self.trainid_to_13id = {id:i for i,id in enumerate(synthia_set_13)}

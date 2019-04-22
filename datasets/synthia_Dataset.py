@@ -56,6 +56,7 @@ class SYNTHIA_Dataset(City_Dataset):
         self.id_to_trainid = {1:10, 2:2, 3:0, 4:1, 5:4, 6:8, 7:5, 8:13, 
                             9:7, 10:11, 11:18, 12:17, 15:6, 16:9, 17:12, 
                             18:14, 19:15, 20:16, 21:3}
+        # only consider 16 shared classes
         self.class_16 = class_16
         synthia_set_16 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18]
         self.trainid_to_16id = {id:i for i,id in enumerate(synthia_set_16)}

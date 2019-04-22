@@ -191,9 +191,9 @@ class CrossCityTrainer(Trainer):
             argpred = np.argmax(pred, axis=1)
             self.Eval.add_batch(label, argpred)
             
-            ##################
-            # target ST loss #
-            ##################
+            ###############
+            # target loss #
+            ###############
             # train with target
             x, _, _ = batch_t
             if self.cuda:
@@ -269,20 +269,24 @@ class CrossCityTrainer(Trainer):
         self.validate_source()
 
 def add_UDA_train_args(arg_parser):
-    arg_parser.add_argument('--city_name', default='Rio', type=str,
-                            help='source dataset choice')
+    arg_parser.add_argument('--city_name', default='Rome', type=str,
+                            choices=['Rome', 'Rio', 'Tokyo', 'Taipei'],
+                            help='choice of city in NTHU datasets')
     arg_parser.add_argument('--source_dataset', default='cityscapes', type=str,
                             help='source dataset choice')
     arg_parser.add_argument('--epoch_num', type=int, default=10,
-                            help="num round") 
+                            help="number of training epochs")     
     arg_parser.add_argument('--target_mode', type=str, default="maxsquare",
-                            help="target_mode")
+                            choices=['maxsquare', 'IW_maxsquare', 'entropy', 'IW_entropy'],
+                            help="the loss function on target domain")
     arg_parser.add_argument('--lambda_target', type=float, default=0.1,
-                            help="lambda_target")
+                            help="lambda of target loss")
     arg_parser.add_argument('--gamma', type=float, default=0, 
-                            help='scaled entorpy')
+                            help='parameter for scaled entorpy')
     arg_parser.add_argument('--IW_ratio', type=float, default=0.2, 
-                            help='IW_ratio')
+                            help='the ratio of image-wise weighting factor')
+    arg_parser.add_argument('--threshold', type=float, default=0.98,
+                            help="threshold for Self-produced guidance")
     return arg_parser
 
 if __name__ == '__main__':
@@ -303,5 +307,5 @@ if __name__ == '__main__':
     args.target_crop_size = args.crop_size
     args.target_base_size = args.base_size
 
-    agent = CrossCityTrainer(args=args, cuda=True, train_id="train_id", logger=logger)
+    agent = CrossCityTrainer(args=args, cuda=True, train_id="train_log", logger=logger)
     agent.main()
