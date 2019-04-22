@@ -238,4 +238,8 @@ python3 tools/solve_crosscity.py --gpu "0" --city_name 'Rome' --source_dataset '
 
 The structure of this code is largely based on [this repo](https://github.com/hualin95/Deeplab-v3plus).
 
+<<<<<<< HEAD
 Deeplabv2 model is borrowed from [Pytorch-Deeplab](https://github.com/speedinghzl/Pytorch-Deeplab).
+=======
+Deeplabv2 model is borrowed from [Pytorch-Deeplab](https://github.com/speedinghzl/Pytorch-Deeplab).
+>>>>>>> e4d5d73215977a3223874878ea0bbb70107e6d60
