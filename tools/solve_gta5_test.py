@@ -25,7 +25,7 @@ from datasets.synthia_Dataset import SYNTHIA_Dataset
 
 from tools.train_source import *
 
-class STTrainer(Trainer):
+class UDATrainer(Trainer):
     def __init__(self, args, cuda=None, train_id="None", logger=None):
         super().__init__(args, cuda, train_id, logger)
         if self.args.source_dataset == 'synthia':
@@ -121,8 +121,6 @@ class STTrainer(Trainer):
 
         self.target_hard_loss = nn.CrossEntropyLoss(ignore_index= -1)
 
-        self.threshold = self.args.threshold
-
     def main(self):
         # display args details
         self.logger.info("Global configuration as follows:")
@@ -150,7 +148,6 @@ class STTrainer(Trainer):
         
         self.args.iter_max = self.dataloader.num_iterations*self.args.epoch_each_round*self.round_num
         print(self.args.iter_max, self.dataloader.num_iterations)
-        #self.epoch_num = self.args.epoch_num
 
         # train
         #self.validate() # check image summary
@@ -166,29 +163,32 @@ class STTrainer(Trainer):
             
             self.epoch_num = (self.current_round+1)*self.args.epoch_each_round
 
+            # generate threshold
+            self.threshold = self.args.threshold
+
             self.train()
 
             self.current_round += 1
         
     def train_one_epoch(self):
         tqdm_epoch = tqdm(zip(self.source_dataloader, self.target_dataloader), total=self.dataloader.num_iterations,
-                          desc="Train Epoch-{}-total-{}".format(self.current_epoch+1, self.args.epoch_num))
+                          desc="Train Round-{}-Epoch-{}-total-{}".format(self.current_round, self.current_epoch+1, self.epoch_num))
         self.logger.info("Training one epoch...")
         self.Eval.reset()
-        # Set the model to be in training mode (for batchnorm and dropout)
-
+        
+        # Initialize your average meters
         loss_seg_value = 0
         loss_target_value = 0
         loss_seg_value_2 = 0
         loss_target_value_2 = 0
         iter_num = self.dataloader.num_iterations
 
+        # Set the model to be in training mode (for batchnorm and dropout)
         if self.args.freeze_bn:
             self.model.eval()
             self.logger.info("freeze bacth normalization successfully!")
         else:
             self.model.train()
-        # Initialize your average meters
 
         batch_idx = 0
         for batch_s, batch_t in tqdm_epoch:
@@ -308,24 +308,22 @@ def add_UDA_train_args(arg_parser):
     arg_parser.add_argument('--round_num', type=int, default=1,
                             help="num round")
     arg_parser.add_argument('--epoch_each_round', type=int, default=2,
-                            help="epoch_each_round")
-    arg_parser.add_argument('--epoch_num', type=int, default=10,
-                            help="number of training epochs")                     
+                            help="epoch_each_round")                 
     arg_parser.add_argument('--target_mode', type=str, default="maxsquare",
                             choices=['maxsquare', 'IW_maxsquare', 'entropy', 'IW_entropy'],
                             help="the loss function on target domain")
-    arg_parser.add_argument('--lambda_target', type=float, default=0.1,
+    arg_parser.add_argument('--lambda_target', type=float, default=1,
                             help="lambda of target loss")
     arg_parser.add_argument('--gamma', type=float, default=0, 
                             help='parameter for scaled entorpy')
-    arg_parser.add_argument('--IW_ratio', type=float, default=0.2, 
+    arg_parser.add_argument('--CW_ratio', type=float, default=0.2, 
                             help='the ratio of image-wise weighting factor')
     arg_parser.add_argument('--threshold', type=float, default=0.98,
                             help="threshold for Self-produced guidance")
     return arg_parser
 
 if __name__ == '__main__':
-    assert LooseVersion(torch.__version__) >= LooseVersion('1.0.0'), 'PyTorch>=1.0.0 is required'
+    assert LooseVersion(torch.__version__) >= LooseVersion('0.4.0'), 'PyTorch>=0.4.0 is required'
 
     arg_parser = argparse.ArgumentParser()
     arg_parser = add_train_args(arg_parser)
@@ -340,5 +338,5 @@ if __name__ == '__main__':
 
     train_id = str(args.source_dataset)+"2"+str(args.target_dataset)+"_"+args.target_mode
 
-    agent = STTrainer(args=args, cuda=True, train_id=train_id, logger=logger)
+    agent = UDATrainer(args=args, cuda=True, train_id=train_id, logger=logger)
     agent.main()

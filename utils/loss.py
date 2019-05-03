@@ -56,7 +56,7 @@ class MaxSquareloss(nn.Module):
         """
         # prob -= 0.5
         mask = (prob != self.ignore_index)    
-        loss = -torch.mean(torch.pow(prob, 2)[mask])/2
+        loss = -torch.mean(torch.pow(prob, 2)[mask]) / 2
         return loss
 
 class ScaledsoftCrossEntropy(nn.Module):

@@ -130,8 +130,8 @@ class CrossCityTrainer(Trainer):
         self.args.iter_max = self.dataloader.num_iterations*self.args.epoch_num
         self.epoch_num = self.args.epoch_num
         # train
-        #self.validate() # check image summary
-        #self.validate_source()
+        self.validate() # check image summary
+        self.validate_source()
         self.train()
 
         self.writer.close()
@@ -141,20 +141,20 @@ class CrossCityTrainer(Trainer):
                           desc="Train Epoch-{}-total-{}".format(self.current_epoch+1, self.epoch_num))
         self.logger.info("Training one epoch...")
         self.Eval.reset()
-        # Set the model to be in training mode (for batchnorm and dropout)
 
+        # Initialize your average meters
         loss_seg_value = 0
         loss_target_value = 0
         loss_seg_value_2 = 0
         loss_target_value_2 = 0
         iter_num = self.dataloader.num_iterations
 
+        # Set the model to be in training mode (for batchnorm and dropout)
         if self.args.freeze_bn:
             self.model.eval()
             self.logger.info("freeze bacth normalization successfully!")
         else:
             self.model.train()
-        # Initialize your average meters
 
         batch_idx = 0
         for batch_s, batch_t in tqdm_epoch:
