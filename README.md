@@ -179,14 +179,14 @@ Then in next step, set `--pretrained_ckpt_file "./log/gta5_pretrain/gta5final.pt
 
 
 ```
-python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 20 --target_mode "maxsquare" --lr 2.5e-4 --lambda_target 0.1
+python3 tools/solve_gta5.py --gpu "0" --backbone "deeplabv2_multi" --dataset 'cityscapes' --checkpoint_dir "./log/gta2city_AdaptSegNet_ST=0.1_maxsquare_round=5/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth" --round_num 5 --target_mode "maxsquare" --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --lambda_target 0.1
 ```
 
 - MaxSquare+IW
 
 
 ```
-python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare_IW/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "IW_maxsquare" --lr 2.5e-4 --lambda_target 0.1 --IW_ratio 0.2
+python3 tools/solve_gta5.py --gpu "0" --backbone "deeplabv2_multi" --dataset 'cityscapes' --checkpoint_dir "./log/gta2city_AdaptSegNet_ST=0.1_IW_maxsquare_round=5/" --pretrained_ckpt_file "./pretrained_model/GTA5_source.pth" --round_num 5 --target_mode "IW_maxsquare" --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --lambda_target 0.1 --IW_ratio 0.2
 ```
 
 (Optional) Pretrain the multi-level model on the source domain (GTA5) by adding "--multi True". 
@@ -196,7 +196,7 @@ Otherwise, download this **[checkpoint](https://drive.google.com/open?id=16wtgTV
 - MaxSquare+IW+Multi
 
 ```
-python3 tools/solve_gta5.py --gpu "0" --source_dataset 'gta5'  --dataset 'cityscapes'   --checkpoint_dir "./log/gta2city_maxsquare_IW_multi/" --pretrained_ckpt_file "./pretrained_model/GTA5_source_multi.pth"  --crop_size "1280,720" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "IW_maxsquare" --lr 2.5e-4 --lambda_target 0.1 --IW_ratio 0.2 --multi True --lambda_seg 0.1
+python3 tools/solve_gta5.py --gpu "0" --backbone "deeplabv2_multi" --dataset 'cityscapes' --checkpoint_dir "./log/gta2city_AdaptSegNet_ST=0.1_IW_maxsquare_multi_round=5/" --pretrained_ckpt_file "./pretrained_model/GTA5_source_multi.pth" --round_num 5 --target_mode "IW_maxsquare" --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --lambda_target 0.1 --IW_ratio 0.2 --multi True --lambda_seg 0.1
 ```
 
 
@@ -213,13 +213,13 @@ python3 tools/train_source.py --gpu "0" --dataset 'synthia' --checkpoint_dir "./
 
 
 ```
-python3 tools/solve_gta5.py --gpu "0" --source_dataset 'synthia'  --dataset 'cityscapes'   --checkpoint_dir "./log/synthia2city_maxsquare/" --pretrained_ckpt_file "./pretrained_model/synthia_source.pth"  --crop_size "1280,760" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "maxsquare" --lr 2.5e-4 --lambda_target 0.1 --num_classes 16
+python3 tools/solve_gta5.py --gpu "0" --backbone "deeplabv2_multi" --source_dataset 'synthia'  --dataset 'cityscapes'   --checkpoint_dir "./log/synthia2city_maxsquare/" --pretrained_ckpt_file "./pretrained_model/synthia_source.pth"  --crop_size "1280,760" --target_crop_size "1024,512"  --round_num 5 --target_mode "maxsquare" --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --lambda_target 0.1 --num_classes 16
 ```
 
 - MaxSquare+IW
 
 ```
-python3 tools/solve_gta5.py --gpu "0" --source_dataset 'synthia'  --dataset 'cityscapes'   --checkpoint_dir "./log/synthia2city_maxsquare_IW/" --pretrained_ckpt_file "./pretrained_model/synthia_source.pth"  --crop_size "1280,760" --target_crop_size "1024,512"  --epoch_num 10 --target_mode "IW_maxsquare" --lr 2.5e-4 --lambda_target 0.1 --num_classes 16 --IW_ratio -0.2
+python3 tools/solve_gta5.py --gpu "0" --backbone "deeplabv2_multi" --source_dataset 'synthia'  --dataset 'cityscapes'   --checkpoint_dir "./log/synthia2city_maxsquare_IW/" --pretrained_ckpt_file "./pretrained_model/synthia_source.pth"  --crop_size "1280,760" --target_crop_size "1024,512"  --round_num 5 --target_mode "IW_maxsquare" --freeze_bn False --weight_decay 5e-4 --lr 2.5e-4 --lambda_target 0.1 --num_classes 16 --IW_ratio -0.2
 ```
 
 
