@@ -335,6 +335,9 @@ if __name__ == '__main__':
     args.source_list_path = datasets_path[args.source_dataset]['list_path']
 
     args.target_dataset = args.dataset
+    # synthia dataset has inverse class imbalance 
+    if args.source_dataset == 'synthia':
+        args.IW_ratio = - args.IW_ratio
 
     train_id = str(args.source_dataset)+"2"+str(args.target_dataset)+"_"+args.target_mode
 
