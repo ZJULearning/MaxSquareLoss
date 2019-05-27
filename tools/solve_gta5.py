@@ -323,7 +323,7 @@ def add_UDA_train_args(arg_parser):
     return arg_parser
 
 if __name__ == '__main__':
-    assert LooseVersion(torch.__version__) >= LooseVersion('0.4.0'), 'PyTorch>=0.4.0 is required'
+    assert LooseVersion(torch.__version__) >= LooseVersion('1.0.0'), 'PyTorch>=1.0.0 is required'
 
     arg_parser = argparse.ArgumentParser()
     arg_parser = add_train_args(arg_parser)
