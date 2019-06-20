@@ -274,8 +274,8 @@ class UDATrainer(Trainer):
 
             if batch_idx % 400 == 0:
                 if self.args.multi:
-                    self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_target={:.3f}; loss_seg_2={:.3f}-loss_target_2={:.3f}".format(self.current_epoch,
-                                                                           batch_idx, loss.item(), loss_target.item(), loss_2.item(), loss_target_2.item()))
+                    self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_target={:.3f}; loss_seg_2={:.3f}-loss_target_2={:.3f}; mask={:.3f}".format(self.current_epoch,
+                                                                           batch_idx, loss.item(), loss_target.item(), loss_2.item(), loss_target_2.item(), mask.float().mean().item()))
                 else:
                     self.logger.info("epoch{}-batch-{}:loss_seg={:.3f}-loss_target={:.3f}".format(self.current_epoch,
                                                                            batch_idx, loss.item(), loss_target.item()))
