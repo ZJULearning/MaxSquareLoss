@@ -32,7 +32,7 @@ pip install -r requirements.txt
 - Download [**GTA5 datasets**](https://download.visinf.tu-darmstadt.de/data/from_games/), which contains 24,966 annotated images with 1914×1052 resolution taken from the GTA5 game. We use the sample code for reading the label maps and a split into training/validation/test set from [here](https://download.visinf.tu-darmstadt.de/data/from_games/code/read_mapping.zip). In the experiments, we resize GTA5 images to 1280x720.
 - Download [**Cityscapes**](https://www.cityscapes-dataset.com/), which contains 5,000 annotated images with 2048 × 1024 resolution taken from real urban street scenes. We resize Cityscapes images to 1024x512 (or 1280x640 which yields sightly better results but costs more time). 
 - Download the **[checkpoint](https://drive.google.com/open?id=1KP37cQo_9NEBczm7pvq_zEmmosdhxvlF)** pretrained on GTA5.
-- If you want to pretrain the model by yourself, download the model pretrained on ImageNet.
+- If you want to pretrain the model by yourself, download [**the model**](http://vllab.ucmerced.edu/ytsai/CVPR18/DeepLab_resnet_pretrained_init-f81d91e8.pth) pretrained on ImageNet.
 
 #### SYNTHIA-to-Cityscapes:
 
@@ -133,7 +133,7 @@ Tips: enlarging the crop size: `--target_crop_size "1280,640"` or setting `--lam
 Eval:
 
 ```
-python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./log/gta2city_AdaptSegNet_ST=0.1_maxsquare_round=5/gta52city_maxsquarebest.pth" --image_summary True
+python3 tools/evaluate.py --gpu "0" --dataset 'cityscapes' --checkpoint_dir "./log/eval_city" --pretrained_ckpt_file "./log/gta2city_AdaptSegNet_ST=0.1_maxsquare_round=5/gta52city_maxsquarebest.pth" --image_summary True --flip True
 ```
 
 To have a look at predicted examples, run tensorboard as follows:
