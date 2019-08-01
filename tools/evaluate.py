@@ -88,7 +88,6 @@ class Evaluater():
     def main(self):
         # choose cuda
         if self.cuda:
-            # torch.cuda.set_device(4)
             current_device = torch.cuda.current_device()
             self.logger.info("This model will run on {}".format(torch.cuda.get_device_name(current_device)))
         else:
@@ -120,8 +119,6 @@ class Evaluater():
                 if isinstance(pred, tuple):
                     pred_2 = pred[1]
                     pred = pred[0]
-                    if self.args.multi: 
-                        pred_P_2 = F.softmax(pred_2, dim=1)
                 y = torch.squeeze(y, 1)
 
                 if self.args.flip:

@@ -302,7 +302,7 @@ def add_UDA_train_args(arg_parser):
                             help='parameter for scaled entorpy')
     arg_parser.add_argument('--IW_ratio', type=float, default=0.2, 
                             help='the ratio of image-wise weighting factor')
-    arg_parser.add_argument('--threshold', type=float, default=0.98,
+    arg_parser.add_argument('--threshold', type=float, default=0.95,
                             help="threshold for Self-produced guidance")
     return arg_parser
 
