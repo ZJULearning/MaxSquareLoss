@@ -1,3 +1,12 @@
+'''
+@Description: 
+@version: 
+@Company: 
+@Author: Minghao Chen
+@Date: 2019-03-02 14:06:37
+@LastEditors: Minghao Chen
+@LastEditTime: 2019-09-27 18:22:46
+'''
 import os
 import random
 import logging
@@ -101,7 +110,13 @@ class UDATrainer(Trainer):
         self.dataloader.valid_iterations = (len(target_data_set) + self.args.batch_size) // self.args.batch_size
 
         self.ignore_index = -1
-        if self.args.target_mode == "maxsquare":
+        if self.args.target_mode == "hard":
+            self.target_loss = nn.CrossEntropyLoss(ignore_index= -1)
+        elif self.args.target_mode == "entropy":
+            self.target_loss = softCrossEntropy(ignore_index= -1)
+        elif self.args.target_mode == "IW_entropy":
+            self.target_loss = IWsoftCrossEntropy(ignore_index= -1, num_class=self.args.num_classes, ratio=self.args.IW_ratio)
+        elif self.args.target_mode == "maxsquare":
             self.target_loss = MaxSquareloss(ignore_index= -1, num_class=self.args.num_classes)
         elif self.args.target_mode == "IW_maxsquare":
             self.target_loss = IW_MaxSquareloss(ignore_index= -1, num_class=self.args.num_classes, ratio=self.args.IW_ratio)
@@ -227,11 +242,19 @@ class UDATrainer(Trainer):
                 pred_P_2 = F.softmax(pred_2, dim=1)
             pred_P = F.softmax(pred, dim=1)
 
-            label = pred_P
-            if self.args.multi: label_2 = pred_P_2
+            if self.args.target_mode == "hard":
+                label = torch.argmax(pred_P.detach(), dim=1)
+                if self.args.multi: label_2 = torch.argmax(pred_P_2.detach(), dim=1)
+            else:
+                label = pred_P
+                if self.args.multi: label_2 = pred_P_2
 
             maxpred, argpred = torch.max(pred_P.detach(), dim=1)
             if self.args.multi: maxpred_2, argpred_2 = torch.max(pred_P_2.detach(), dim=1)
+
+            if self.args.target_mode == "hard":
+                mask = (maxpred > self.threshold)
+                label = torch.where(mask, label, torch.ones(1).to(self.device, dtype=torch.long)*self.ignore_index)
             
             loss_target = self.args.lambda_target*self.target_loss(pred, label)
 
@@ -294,7 +317,7 @@ def add_UDA_train_args(arg_parser):
     arg_parser.add_argument('--epoch_each_round', type=int, default=2,
                             help="epoch each round")                 
     arg_parser.add_argument('--target_mode', type=str, default="maxsquare",
-                            choices=['maxsquare', 'IW_maxsquare'],
+                            choices=['maxsquare', 'IW_maxsquare', 'entropy', 'IW_entropy', 'hard'],
                             help="the loss function on target domain")
     arg_parser.add_argument('--lambda_target', type=float, default=1,
                             help="lambda of target loss")

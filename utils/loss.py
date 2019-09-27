@@ -1,9 +1,70 @@
+'''
+@Description: 
+@version: 
+@Company: 
+@Author: Minghao Chen
+@Date: 2019-03-02 14:06:37
+@LastEditors: Minghao Chen
+@LastEditTime: 2019-03-02 14:06:37
+'''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import numpy as np
 from math import ceil, floor
+
+class softCrossEntropy(nn.Module):
+    def __init__(self, ignore_index= -1):
+        super(softCrossEntropy, self).__init__()
+        self.ignore_index = ignore_index
+        return
+
+    def forward(self, inputs, target):
+        """
+        :param inputs: predictions (N, C, H, W)
+        :param target: target distribution (N, C, H, W)
+        :return: loss
+        """
+        assert inputs.size() == target.size()
+        mask = (target != self.ignore_index)
+
+        log_likelihood = F.log_softmax(inputs, dim=1)
+        loss = torch.mean(torch.mul(-log_likelihood, target)[mask])
+
+        return loss
+
+class IWsoftCrossEntropy(nn.Module):
+    # class_wise softCrossEntropy for class balance
+    def __init__(self, ignore_index= -1, num_class=19, ratio=0.2):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.num_class = num_class
+        self.ratio = ratio
+        return
+
+    def forward(self, inputs, target):
+        """
+        :param inputs: predictions (N, C, H, W)
+        :param target: target distribution (N, C, H, W)
+        :return: loss with image-wise weighting factor
+        """
+        assert inputs.size() == target.size()
+        mask = (target != self.ignore_index)
+        _, argpred = torch.max(inputs, 1)
+        weights = []
+        batch_size = inputs.size(0)
+        for i in range(batch_size):
+            hist = torch.histc(argpred[i].cpu().data.float(), 
+                            bins=self.num_class, min=0,
+                            max=self.num_class-1).float()
+            weight = (1/torch.max(torch.pow(hist, self.ratio)*torch.pow(hist.sum(), 1-self.ratio), torch.ones(1))).to(argpred.device)[argpred[i]].detach()
+            weights.append(weight)
+        weights = torch.stack(weights, dim=0)
+
+        log_likelihood = F.log_softmax(inputs, dim=1)
+        loss = torch.sum((torch.mul(-log_likelihood, target)*weights)[mask]) / (batch_size*self.num_class)
+        return loss
 
 class IW_MaxSquareloss(nn.Module):
     def __init__(self, ignore_index= -1, num_class=19, ratio=0.2):
