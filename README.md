@@ -4,7 +4,7 @@ By Minghao Chen, Hongyang Xue, Deng Cai.
 
 ## Introduction
 
-A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segmentation with Maximum Squares Loss"](). The segmentation model is based on Deeplabv2 with ResNet-101 backbone. "MaxSquare+IW+Multi" introduced in the paper achieve competitive result on all three UDA datasets: GTA5, SYNTHIA, NTHU dataset. Moreover, our method achieves the state-of-the-art results in GTA5-to-Cityscapes and Cityscapes-to-NTHU adaptation.
+A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segmentation with Maximum Squares Loss"](). The segmentation model is based on Deeplabv2 with ResNet-101 backbone. "MaxSquare+IW+Multi" introduced in the paper achieves competitive result on three UDA datasets: GTA5, SYNTHIA, CrossCity dataset. Moreover, our method achieves the state-of-the-art results in GTA5-to-Cityscapes and Cityscapes-to-CrossCity adaptation.
 
 ### Citation
 
@@ -39,7 +39,7 @@ pip install -r requirements.txt
 - Download [**SYNTHIA-RAND-CITYSCAPES**](http://synthia-dataset.net/download/808/) consisting of 9,400 1280 × 760 synthetic images. We resize images to 1280x760.
 - Download the [**checkpoint**](https://drive.google.com/open?id=1wLffQRljXK1xoqRY64INvb2lk2ur5fEL) pretrained on SYNTHIA.
 
-#### Cityscapes-to-NTHU
+#### Cityscapes-to-CrossCity
 
 - Download [**NTHU dataset**](https://yihsinchen.github.io/segmentation_adaptation_dataset/), which consists of images with 2048 × 1024 resolution from four different cities: Rio, Rome, Tokyo, and Taipei. We resize images to 1024x512, the same as Cityscapes.
 - Download the **[checkpoint](https://drive.google.com/open?id=1QMpj7sPqsVwYldedZf8A5S2pT-4oENEn)** pretrained on Cityscapes.
@@ -58,7 +58,7 @@ We present several transfered results reported in our paper and provide the corr
 
 
 
-### Cityscapes-to-NTHU
+### Cityscapes-to-CrossCity
 
 ##### **Rome**
 
@@ -142,7 +142,7 @@ tensorboard --logdir=./log/eval_city  --port=6009
 
 
 
-### Cityscapes-to-NTHU
+### Cityscapes-to-CrossCity
 
 (Optional) Pretrain the model on the source domain (Cityscapes). 
 
