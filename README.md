@@ -11,7 +11,12 @@ A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segm
 If you use this code in your research, please cite:
 
 ```
-
+@inproceedings{maxsquareloss,
+  title={Domain Adaptation for Semantic Segmentation with Maximum Squares Loss},
+  author={Minghao Chen, Hongyang Xue and Deng Cai},
+  booktitle={IEEE International Conference on Computer Vision(ICCV)},
+  year={2019}
+}
 ```
 
 ## Requirements
