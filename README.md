@@ -4,7 +4,7 @@ By Minghao Chen, Hongyang Xue, Deng Cai.
 
 ## Introduction
 
-A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segmentation with Maximum Squares Loss"](). The segmentation model is based on Deeplabv2 with ResNet-101 backbone. "MaxSquare+IW+Multi" introduced in the paper achieves competitive result on three UDA datasets: GTA5, SYNTHIA, CrossCity dataset. Moreover, our method achieves the state-of-the-art results in GTA5-to-Cityscapes and Cityscapes-to-CrossCity adaptation.
+A **PyTorch** implementation for our paper ["Domain Adaptation for Semantic Segmentation with Maximum Squares Loss"](https://arxiv.org/abs/1909.13589). The segmentation model is based on Deeplabv2 with ResNet-101 backbone. "MaxSquare+IW+Multi" introduced in the paper achieves competitive result on three UDA datasets: GTA5, SYNTHIA, CrossCity dataset. Moreover, our method achieves the state-of-the-art results in GTA5-to-Cityscapes and Cityscapes-to-CrossCity adaptation.
 
 ### Citation
 
