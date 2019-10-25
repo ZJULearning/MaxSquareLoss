@@ -55,6 +55,8 @@ Put all datasets into "datasets" folder and all checkpoints into "pretrained_mod
 
 We present several transfered results reported in our paper and provide the corresponding checkpoints.
 
+![results](/result.png)
+
 ### GTA5-to-Cityscapes:
 
 | Method  | Source | MinEnt | [MaxSquare](https://drive.google.com/open?id=1KmM8zBD1G1XTmzaV_I_aJgi9DW-49kxc) | [MaxSquare+IW](https://drive.google.com/open?id=11oliS-Vu2W6dB8W9ZvqlN0R4cC4Pb8i6) | [MaxSquare+IW+Multi](https://drive.google.com/open?id=1YwK68IMmWHZnAL8FU9ZY-Le34P80Kf86) |
