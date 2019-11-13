@@ -11,11 +11,12 @@ A **PyTorch** implementation for our ICCV 2019 paper ["Domain Adaptation for Sem
 If you use this code in your research, please cite:
 
 ```
-@inproceedings{maxsquareloss,
-  title={Domain Adaptation for Semantic Segmentation with Maximum Squares Loss},
-  author={Minghao Chen, Hongyang Xue and Deng Cai},
-  booktitle={IEEE International Conference on Computer Vision(ICCV)},
-  year={2019}
+@InProceedings{Chen_2019_ICCV,
+author = {Chen, Minghao and Xue, Hongyang and Cai, Deng},
+title = {Domain Adaptation for Semantic Segmentation With Maximum Squares Loss},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {October},
+year = {2019}
 }
 ```
 
